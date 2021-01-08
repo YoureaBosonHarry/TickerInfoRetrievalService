@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "TickerInfoRetrievalService": {
-      "commandName": "Project",
-      "environmentVariables": {
-      }
-    }
-  }
-}
