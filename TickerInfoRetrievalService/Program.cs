@@ -20,10 +20,12 @@ namespace TickerInfoRetrievalService
             var apiKKey = Environment.GetEnvironmentVariable("APIKEY");
             var service = new ServiceCollection()
                 .AddScoped<IInfoRetrievalService>(_ => new InfoRetrievalService(tickerInfoEndpoint, apiKKey))
+                .AddScoped<InfoScraperService>()
                 .BuildServiceProvider();
 
-            var infoService = service.GetService<IInfoRetrievalService>();
-            infoService.GetDailyInfoByTicker("aapl");
+            var scraper = service.GetRequiredService<InfoScraperService>();
+            scraper.CreateBrowser();
+            scraper.ScrapeByTicker("AAPL");
             Task.Delay(-1).Wait();
 
         }

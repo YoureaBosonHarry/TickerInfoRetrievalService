@@ -26,17 +26,12 @@ namespace TickerInfoRetrievalService.Services
         {
             using (var client = new HttpClient())
             {
-                var response = await client.GetAsync($"{this.tickerInfoEndpoint}/stable/stock/aapl/batch?types=quote,news,chart&range=1m&last=10&token={this.apiKey}");
+                var response = await client.GetAsync($"{this.tickerInfoEndpoint}/stable/stock/{ticker}/batch?types=quote,news,chart&range=1m&last=10&token={this.apiKey}");
                 response.EnsureSuccessStatusCode();
                 var responseStream = await response.Content.ReadAsStreamAsync();
                 var jsonOptions = new System.Text.Json.JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
                 var results = await System.Text.Json.JsonSerializer.DeserializeAsync<DailyInfoModel>(responseStream, jsonOptions);
-                this.logger.Information("Success");
-                foreach (var chart in results.chart)
-                {
-                    this.logger.Information("LOOP");
-                    this.logger.Information(chart.open.ToString());
-                }
+               // var results = await System.Text.Json.JsonSerializer.DeserializeAsync<DailyInfoModel>(responseStream, jsonOptions);
             }
         }
     }
