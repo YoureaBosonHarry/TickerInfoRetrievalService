@@ -6,9 +6,9 @@ using TickerInfoRetrievalService.Models;
 
 namespace TickerInfoRetrievalService.Services.Interfaces
 {
-    public interface IDBCommunicationService
+    public interface IInfoScraperService
     {
-        Task<IEnumerable<Tickers>> GetTickers();
-        Task InsertDailyInfoByTicker(YahooSummaryModel tickerDailyInfo);
+        Task CreateBrowser();
+        Task<YahooSummaryModel> ScrapeByTicker(string ticker);
     }
 }

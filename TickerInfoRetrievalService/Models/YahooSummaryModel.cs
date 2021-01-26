@@ -4,14 +4,15 @@ using System.Text;
 
 namespace TickerInfoRetrievalService.Models
 {
-    class YahooSummaryModel
+    public class YahooSummaryModel
     {
-        public DateTime Date { get; set; }
-        public decimal Open { get; set; }
-        public decimal Close { get; set; }
-        public decimal High { get; set; }
-        public decimal Low { get; set; }
-        public decimal AdjClose { get; set; }
+        public string Ticker { get; set; }
+        public DateTime DateAdded { get; set; }
+        public decimal DailyLow { get; set; }
+        public decimal DailyHigh { get; set; }
+        public decimal DailyOpen { get; set; }
+        public decimal DailyClose { get; set; }
         public int Volume { get; set; }
+        public decimal AdjClose { get; set; }
     }
 }
