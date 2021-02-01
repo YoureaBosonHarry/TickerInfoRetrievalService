@@ -55,7 +55,7 @@ namespace TickerInfoRetrievalService.Services
                 .Skip(1)
                 .Where(tr => tr.Elements("td").Count() > 1)
                 .Select(tr => tr.Elements("td").Select(td => td.InnerText.Trim()).ToList())
-                .ToList();
+                .ToList() ?? new List<List<string>>();
             if (htmlBody.Count() > 0 && htmlBody.FirstOrDefault().Count() > 6)
             {
                 var summaryModel = new YahooSummaryModel();
