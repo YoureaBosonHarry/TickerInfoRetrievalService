@@ -16,6 +16,7 @@ namespace TickerInfoRetrievalService
 {
     class Program
     {
+       
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
@@ -31,7 +32,7 @@ namespace TickerInfoRetrievalService
                 var scraperService = new InfoScraperService();
                 var infoRetrievalService = new InfoRetrievalService(tickerInfoEndpoint, apiKKey);
                 var dbCommunicationService = new DBCommunicationService(dbEndpoint);
-                services.AddScoped<IInfoScraperService>(_ => scraperService);
+                services.AddSingleton<IInfoScraperService>(_ => scraperService);
                 services.AddScoped<IInfoRetrievalService>(_ => infoRetrievalService);
                 services.AddScoped<IDBCommunicationService>(_ => dbCommunicationService);
                 services.AddQuartz(q =>
@@ -46,7 +47,6 @@ namespace TickerInfoRetrievalService
                     q.AddTrigger(opts => opts.ForJob(jobKey).WithDailyTimeIntervalSchedule(s =>
                                     s.WithIntervalInHours(24)
                                     .OnMondayThroughFriday()
-                                    .OnEveryDay()
                                     .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(21, 30))
                                     .InTimeZone(TimeZoneInfo.Utc)
                                 )
@@ -80,14 +80,15 @@ namespace TickerInfoRetrievalService
             var dbService = service.GetService<IDBCommunicationService>();
             await scraper.CreateBrowser();
             var tickers = await dbService.GetTickers();
-            var remaining = tickers.SkipWhile(i => i.Ticker != "SEE");
-            foreach (var ticker in remaining)
+            //var remaining = tickers.SkipWhile(i => i.Ticker != "SEE");
+            foreach (var ticker in tickers)
             {
-                if (ticker.Ticker != "SEE")
+                var info = await scraper.ScrapeByTicker(ticker.Ticker);
+                if (info != null)
                 {
-                    var info = await scraper.ScrapeByTicker(ticker.Ticker);
-                    await dbService.InsertDailyInfoByTicker(info);
+                    //await dbService.InsertDailyInfoByTicker(info);
                 }
+                
             }
             //SetTimer(new TimeSpan(21, 30, 0), dbService, scraper);
             Task.Delay(-1).Wait();
@@ -107,14 +108,16 @@ namespace TickerInfoRetrievalService
             foreach (var ticker in tickers)
             {
                 var info = await scraperService.ScrapeByTicker(ticker.Ticker);
-                await dbService.InsertDailyInfoByTicker(info);
+                if (info != null)
+                {
+                    await dbService.InsertDailyInfoByTicker(info);
+                }
             }
             Log.Information($"{DateTime.UtcNow.DayOfWeek} Info Complete");
         }
 
-    }
         */
-
+        
 
         public class QuartzJobRunner : IJob
         {
@@ -177,5 +180,4 @@ namespace TickerInfoRetrievalService
         }
 
     }
-
 }

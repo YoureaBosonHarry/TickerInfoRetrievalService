@@ -25,17 +25,27 @@ namespace TickerInfoRetrievalService.Services
             await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
         }
 
-        public async Task<YahooSummaryModel> ScrapeByTicker(string ticker)
+        #nullable enable
+        public async Task<YahooSummaryModel?> ScrapeByTicker(string ticker)
         {
-            using (var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, Args = new string[] { "--no-sandbox" } }))
-            using (var page = await browser.NewPageAsync())
+            try {
+                using (var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, Args = new string[] { "--no-sandbox" } }))
+                using (var page = await browser.NewPageAsync())
+                {
+                    page.DefaultTimeout = 60000;
+                    this.logger.Debug($"Attempting To Scrape Info For {ticker}");
+                    await page.GoToAsync($"https://finance.yahoo.com/quote/{ticker}/history?p={ticker}");
+                    this.logger.Information($"Successfully Scraped Info For {ticker}");
+                    string content = await page.GetContentAsync();
+                    browser.Disconnect();
+                    await browser.CloseAsync();
+                    return ParseHtml(ticker, content);
+                }
+            }
+            catch (Exception e)
             {
-                page.DefaultTimeout = 30000;
-                this.logger.Debug($"Attempting To Scrape Info For {ticker}");
-                await page.GoToAsync($"https://finance.yahoo.com/quote/{ticker}/history?p={ticker}");
-                this.logger.Debug($"Successfully Scraped Info For {ticker}");
-                string content = await page.GetContentAsync();
-                return ParseHtml(ticker, content);
+                this.logger.Error(e.StackTrace);
+                return null;
             }
         }
 
@@ -79,7 +89,6 @@ namespace TickerInfoRetrievalService.Services
                 AdjClose = adjClose,
                 Volume = volume
             };
-            this.logger.Information(yahooSummaryModel.Volume.ToString());
             return yahooSummaryModel;
         }
     }

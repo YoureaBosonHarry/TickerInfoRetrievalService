@@ -9,6 +9,7 @@ namespace TickerInfoRetrievalService.Services.Interfaces
     public interface IInfoScraperService
     {
         Task CreateBrowser();
-        Task<YahooSummaryModel> ScrapeByTicker(string ticker);
+        #nullable enable
+        Task<YahooSummaryModel?> ScrapeByTicker(string ticker);
     }
 }
